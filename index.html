@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KMLOG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --surface: #12151a;
+      --surface-2: #181c23;
+      --line: #232830;
+      --ink: #e6e9ee;
+      --ink-2: #9aa3b2;
+      --ink-3: #5b6472;
+      --accent: #82c91e;
+      --mark: #66a80f;
+      --accent-dim: #4a6b1c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--bg); }
+    body {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 48px; }
+    header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;
+    }
+    header h1 { font-size: 15px; font-weight: 700; letter-spacing: .18em; }
+    header h1 span { color: var(--accent); }
+    header .today { color: var(--ink-3); font-size: 11px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .tile {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 10px 12px 12px;
+    }
+    .tile .label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+    .tile .value { font-size: 30px; font-weight: 700; margin-top: 2px; letter-spacing: -.02em; }
+    .tile .value small { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
+    .tile.hero .value { color: var(--accent); }
+    .tile .sub { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
+    .tile .sub.up { color: var(--accent); }
+    section h2 {
+      font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3);
+      font-weight: 600; margin: 16px 0 8px; display: flex; justify-content: space-between;
+    }
+    section h2 .range { letter-spacing: .04em; text-transform: none; font-weight: 400; }
+    .chartbox { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 8px 6px; }
+    #chart { display: block; width: 100%; height: auto; }
+    .tooltip {
+      position: fixed; z-index: 10; pointer-events: none; display: none;
+      background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
+      padding: 6px 9px; font-size: 11px; box-shadow: 0 4px 16px rgba(0,0,0,.5);
+    }
+    .tooltip .t-label { color: var(--ink-3); font-size: 10px; letter-spacing: .08em; }
+    .tooltip .t-value { font-weight: 600; font-size: 13px; margin-top: 1px; }
+    .tooltip .t-value em { font-style: normal; color: var(--accent); }
+    .legend-note { font-size: 10px; color: var(--ink-3); margin-top: 4px; padding-left: 2px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+    .grid2 { display: grid; grid-template-columns: 5fr 7fr; gap: 8px; align-items: start; margin-top: 8px; }
+    form.add { padding: 12px; display: grid; gap: 8px; }
+    form.add label { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 3px; }
+    form.add input {
+      width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
+      color: var(--ink); font: inherit; padding: 7px 9px; color-scheme: dark;
+    }
+    form.add input:focus { outline: none; border-color: var(--accent-dim); }
+    form.add .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button {
+      font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid transparent;
+      background: var(--accent); color: #0b0d10; font-weight: 600; letter-spacing: .08em;
+      padding: 8px 14px; font-size: 12px;
+    }
+    button:hover { filter: brightness(1.08); }
+    .msg { font-size: 11px; min-height: 16px; color: var(--ink-3); }
+    .msg.err { color: #e6a23c; }
+    .msg.ok { color: var(--accent); }
+    .runs .head, .run {
+      display: grid; grid-template-columns: 82px 1fr 52px 66px 34px; gap: 8px; align-items: center;
+      padding: 7px 12px; font-size: 12px;
+    }
+    .runs .head {
+      color: var(--ink-3); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+    }
+    .run { border-bottom: 1px solid var(--line); }
+    .run:last-child { border-bottom: none; }
+    .run:nth-child(odd) { background: var(--surface-2); }
+    .run .d { color: var(--ink-2); }
+    .run .km { font-weight: 600; }
+    .run .pace, .run .time { color: var(--ink-2); }
+    .run .del {
+      background: none; border: 1px solid var(--line); color: var(--ink-3);
+      font-size: 10px; padding: 3px 0; width: 30px; letter-spacing: 0;
+    }
+    .run .del:hover { color: #e6a23c; border-color: #e6a23c; filter: none; }
+    .empty { padding: 16px 12px; color: var(--ink-3); font-size: 12px; }
+    footer { margin-top: 14px; font-size: 10px; color: var(--ink-3); letter-spacing: .06em; }
+    @media (max-width: 720px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .grid2 { grid-template-columns: 1fr; }
+      .runs .head, .run { grid-template-columns: 74px 1fr 46px 60px 30px; gap: 6px; font-size: 11px; padding: 7px 10px; }
+      .tile .value { font-size: 26px; }
+    }
+  </style>
+</head>
+<body data-palette="#66a80f">
+<div class="wrap">
+  <header>
+    <h1>KM<span>LOG</span>_</h1>
+    <div class="today" id="today"></div>
+  </header>
+
+  <div class="stats">
+    <div class="tile hero">
+      <div class="label">This week</div>
+      <div class="value"><span id="weekKm">0</span><small> km</small></div>
+      <div class="sub" id="weekSub">&nbsp;</div>
+    </div>
+    <div class="tile">
+      <div class="label">Streak</div>
+      <div class="value"><span id="streak">0</span><small> d</small></div>
+      <div class="sub">consecutive days</div>
+    </div>
+    <div class="tile">
+      <div class="label">4-wk avg</div>
+      <div class="value"><span id="avgKm">0</span><small> km</small></div>
+      <div class="sub">per week</div>
+    </div>
+    <div class="tile">
+      <div class="label">Total</div>
+      <div class="value"><span id="totalKm">0</span><small> km</small></div>
+      <div class="sub" id="totalSub">&nbsp;</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Weekly distance <span class="range" id="chartRange"></span></h2>
+    <div class="chartbox">
+      <svg id="chart" viewBox="0 0 640 220" role="img" aria-label="Weekly distance, last 12 weeks"></svg>
+      <div class="legend-note">hover a bar for week detail</div>
+      <div class="tooltip" id="tooltip" role="status"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Log a run</h2>
+    <div class="grid2">
+      <form class="add panel" id="addForm">
+        <div>
+          <label for="fDate">Date</label>
+          <input type="date" id="fDate" required>
+        </div>
+        <div class="row">
+          <div>
+            <label for="fKm">Distance (km)</label>
+            <input type="number" id="fKm" placeholder="5.2" min="0.1" max="200" step="0.1" required>
+          </div>
+          <div>
+            <label for="fMin">Duration (min)</label>
+            <input type="number" id="fMin" placeholder="28" min="1" max="600" step="1" required>
+          </div>
+        </div>
+        <div class="msg" id="msg"></div>
+        <button type="submit">ADD RUN</button>
+      </form>
+      <div class="panel">
+        <div class="runs">
+          <div class="head">
+            <span>Date</span><span>KM</span><span>Time</span><span>Pace</span><span></span>
+          </div>
+          <div id="runList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>kmlog · data stays in this browser · localStorage</footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
