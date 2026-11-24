@@ -1,7 +1,8 @@
 "use strict";
 const KEY = location.pathname + ":kmlog:runs";
-const ACCENT = "#45f0ff";
-const MARK = "#17a9bd";
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const ACCENT = cssVar("--accent") || "#ff8c3a";
+const MARK = cssVar("--mark") || "#a3552a";
 const $ = id => document.getElementById(id);
 const fmt = n => n.toFixed(1);
 
@@ -15,8 +16,10 @@ function loadRuns() {
 }
 function saveRuns(runs) { try { localStorage.setItem(KEY, JSON.stringify(runs)); } catch (e) { /* ignore */ } }
 
-function iso(d) { return d.toISOString().slice(0, 10); }
-function fromISO(s) { return new Date(s + "T00:00:00"); }
+/* Local calendar dates (not UTC), so "today" matches the runner's clock. */
+const pad2 = n => String(n).padStart(2, "0");
+function iso(d) { return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+function fromISO(s) { const p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
 function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 function weekStart(dateStr) {
   const d = fromISO(dateStr);
@@ -24,6 +27,7 @@ function weekStart(dateStr) {
   return iso(addDays(d, -dow));
 }
 function daysAgoISO(n) { return iso(addDays(new Date(), -n)); }
+function pretty(s) { return fromISO(s).toLocaleDateString(undefined, { day: "numeric", month: "short" }); }
 
 /* ---- seed: believable sample data so the first open is never empty ---- */
 function seed() {
@@ -71,6 +75,16 @@ function currentStreak(runs) {
   return streak;
 }
 
+/* One short encouraging line under the streak counter. */
+function cheerLine(streak, ranToday) {
+  if (streak === 0) return "A clean page today — even a short one counts.";
+  if (streak === 1) return "One day down. Tomorrow is where a streak begins.";
+  if (streak >= 21) return "<b>" + streak + " days strong</b> — that's a habit now.";
+  if (streak >= 7) return "<b>" + streak + " days strong</b>. A full week and counting.";
+  if (!ranToday) return "<b>" + streak + " days so far</b> — today's run keeps it alive.";
+  return "<b>" + streak + " days strong</b>. Keep the glow going.";
+}
+
 /* ---- live streak clock (hours/minutes/seconds until it can break) ---- */
 function updateClock(runs) {
   const now = new Date();
@@ -80,16 +94,14 @@ function updateClock(runs) {
   const cap = $("streakCap");
   const secsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
   const left = 86400 - secsToday;
-  const hh = String(Math.floor(left / 3600)).padStart(2, "0");
-  const mm = String(Math.floor((left % 3600) / 60)).padStart(2, "0");
-  const ss = String(left % 60).padStart(2, "0");
-  const t = hh + ":" + mm + ":" + ss;
+  const hh = pad2(Math.floor(left / 3600));
+  const mm = pad2(Math.floor((left % 3600) / 60));
+  const ss = pad2(left % 60);
+  clock.textContent = hh + ":" + mm + ":" + ss;
   if (runDays.has(today)) {
-    clock.textContent = t;
     clock.className = "clock";
     cap.innerHTML = 'run logged today — streak <b>safe</b> until midnight';
   } else {
-    clock.textContent = t;
     clock.className = "clock warn";
     cap.innerHTML = 'until streak breaks — <b>log a run today</b>';
   }
@@ -97,10 +109,12 @@ function updateClock(runs) {
 
 /* ---- chart ---- */
 const WEEKS_SHOWN = 12;
+let lastWeeks = [];
+let tipBound = false;
 function renderChart(runs) {
   const svg = $("chart");
   const W = 640, H = 220;
-  const pad = { l: 34, r: 8, t: 14, b: 24 };
+  const pad = { l: 34, r: 8, t: 16, b: 24 };
   const weeks = [];
   const curWS = weekStart(daysAgoISO(0));
   for (let i = WEEKS_SHOWN - 1; i >= 0; i--) {
@@ -112,7 +126,7 @@ function renderChart(runs) {
   const plotW = W - pad.l - pad.r;
   const plotH = H - pad.t - pad.b;
   const band = plotW / weeks.length;
-  const barW = Math.max(10, Math.min(24, band * 0.55));
+  const barW = Math.max(10, Math.min(28, band * 0.55));
   let out = [];
   for (let g = 0; g <= 2; g++) {
     const v = niceMax / 2 * g;
@@ -126,45 +140,40 @@ function renderChart(runs) {
     const y = pad.t + plotH - h;
     const cur = wk.ws === curWS;
     const fill = cur ? ACCENT : MARK;
-    const r = Math.min(3, h / 2);
+    const r = Math.min(6, h / 2);
     if (wk.km > 0) {
       out.push('<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + Math.max(0, h).toFixed(1) + '" rx="' + r.toFixed(1) + '" fill="' + fill + '"/>');
     } else {
       out.push('<line x1="' + x.toFixed(1) + '" x2="' + (x + barW).toFixed(1) + '" y1="' + (pad.t + plotH) + '" y2="' + (pad.t + plotH) + '" stroke="var(--ink-3)" stroke-width="2"/>');
     }
     if (cur) {
-      out.push('<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle" fill="var(--ink-2)" font-size="10" font-weight="600">' + fmt(wk.km) + '</text>');
+      out.push('<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" fill="' + ACCENT + '" font-size="11" font-weight="900">' + fmt(wk.km) + '</text>');
     }
-    out.push('<text x="' + (pad.l + band * i + band / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" fill="var(--ink-3)" font-size="10">' + wk.ws.slice(5).replace("-", "/") + '</text>');
+    out.push('<text x="' + (pad.l + band * i + band / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" fill="var(--ink-3)" font-size="10">' + pretty(wk.ws) + '</text>');
     out.push('<rect class="hit" data-i="' + i + '" x="' + (pad.l + band * i).toFixed(1) + '" y="' + pad.t + '" width="' + band.toFixed(1) + '" height="' + plotH + '" fill="transparent"/>');
   });
   svg.innerHTML = out.join("");
-  renderTooltip(weeks);
-}
-
-/* ---- tooltip (bound once) ---- */
-let lastWeeks = [];
-let tipBound = false;
-function renderTooltip(weeks) {
   lastWeeks = weeks;
   if (tipBound) return;
   tipBound = true;
   const tip = $("tooltip");
-  const svg = $("chart");
-  svg.addEventListener("mousemove", function (e) {
+  function onPoint(e) {
     const t = e.target;
-    if (t.classList && t.classList.contains("hit")) {
+    if (t.classList && t.classList.contains("hit") && typeof e.clientX === "number") {
       const wk = lastWeeks[+t.getAttribute("data-i")];
-      tip.innerHTML = '<div class="t-label">' + wk.ws + " → +6d" + '</div>' +
-        '<div class="t-value"><em>' + fmt(wk.km) + ' km</em> · ' + wk.count + ' runs</div>';
-      tip.style.position = "fixed";
-      tip.style.left = (e.clientX + 12) + "px";
+      if (!wk) return;
+      const end = iso(addDays(fromISO(wk.ws), 6));
+      tip.innerHTML = '<div class="t-label">' + pretty(wk.ws) + " → " + pretty(end) + '</div>' +
+        '<div class="t-value"><em>' + fmt(wk.km) + ' km</em> · ' + wk.count + (wk.count === 1 ? ' run' : ' runs') + '</div>';
+      tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 160) + "px";
       tip.style.top = (e.clientY - 14) + "px";
       tip.style.display = "block";
     } else {
       tip.style.display = "none";
     }
-  });
+  }
+  svg.addEventListener("mousemove", onPoint);
+  svg.addEventListener("click", onPoint);
   svg.addEventListener("mouseleave", function () { tip.style.display = "none"; });
 }
 
@@ -172,23 +181,23 @@ function renderTooltip(weeks) {
 function paceStr(r) {
   const p = r.min / r.km;
   const m = Math.floor(p);
-  return m + ":" + String(Math.round((p - m) * 60)).padStart(2, "0") + "/km";
+  return m + ":" + pad2(Math.round((p - m) * 60)) + "/km";
 }
 function timeStr(min) {
   const h = Math.floor(min / 60);
   const m = Math.round(min % 60);
-  return h ? h + ":" + String(m).padStart(2, "0") + "h" : m + "m";
+  return h ? h + ":" + pad2(m) + "h" : m + "m";
 }
 function renderList(runs) {
   const el = $("runList");
   const sorted = runs.slice().sort(function (a, b) { return b.date < a.date ? -1 : b.date > a.date ? 1 : b.id < a.id ? -1 : 1; });
   const show = sorted.slice(0, 15);
   if (!show.length) {
-    el.innerHTML = '<div class="empty">no runs yet — log one below</div>';
+    el.innerHTML = '<div class="empty">No runs yet — log your first one.</div>';
   } else {
     el.innerHTML = show.map(function (r) {
       return '<div class="run">' +
-        '<span class="d">' + r.date.slice(5).replace("-", "/") + '</span>' +
+        '<span class="d">' + pretty(r.date) + '</span>' +
         '<span class="km">' + fmt(r.km) + '</span>' +
         '<span class="time">' + timeStr(r.min) + '</span>' +
         '<span class="pace">' + paceStr(r) + '</span>' +
@@ -215,14 +224,17 @@ function renderAll(runs) {
   } else {
     sub.textContent = "no data for last week";
   }
-  $("streak").textContent = currentStreak(runs);
+  const streak = currentStreak(runs);
+  const ranToday = runs.some(r => r.date === today);
+  $("streak").textContent = streak;
+  $("streakCheer").innerHTML = cheerLine(streak, ranToday);
   let avg = 0;
   for (let i = 1; i <= 4; i++) avg += weekKm(runs, weekStart(daysAgoISO(i * 7)));
   $("avgKm").textContent = fmt(avg / 4);
   const total = runs.reduce(function (s, r) { return s + r.km; }, 0);
   $("totalKm").textContent = fmt(total);
   $("totalSub").textContent = runs.length + " runs";
-  $("today").textContent = iso(new Date()) + " · UTC" + (-new Date().getTimezoneOffset() / 60);
+  $("today").textContent = new Date().toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
   $("chartRange").textContent = WEEKS_SHOWN + " weeks";
   renderChart(runs);
   renderList(runs);

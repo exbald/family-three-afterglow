@@ -3,154 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NIGHTOPS — run tracker</title>
+  <meta name="theme-color" content="#0e0b09">
+  <title>Afterglow — run tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #050607;
-      --surface: #0c0e11;
-      --surface-2: #111418;
-      --line: #1e242b;
-      --ink: #f4f7fa;
-      --ink-2: #a7b1bd;
-      --ink-3: #57606c;
-      --accent: #45f0ff;
-      --mark: #17a9bd;
-      --accent-dim: #14606c;
-      --warn: #ffb020;
+      --bg: #0e0b09;          /* near-black, warmed */
+      --surface: #17120f;
+      --surface-2: #201915;
+      --line: #2e2520;
+      --ink: #f8f2eb;
+      --ink-2: #c0ae9f;
+      --ink-3: #8a7a6e;
+      --accent: #ff8c3a;      /* sunset orange */
+      --accent-deep: #e8590c;
+      --accent-dim: #4d2c17;
+      --mark: #a3552a;        /* dimmed orange for past weeks */
+      --lime: #c9f24f;        /* the "good news" accent */
+      --warn: #ff6a5c;
+      --radius: 18px;
+      --radius-s: 12px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { background: var(--bg); }
     body {
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      background: var(--bg);
+      font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg) radial-gradient(900px 420px at 50% -80px, rgba(255, 140, 58, .16), transparent 70%) no-repeat;
       color: var(--ink);
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
     }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 48px; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
     header {
-      display: flex; align-items: baseline; justify-content: space-between;
-      border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+      border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 16px;
     }
-    header h1 { font-size: 15px; font-weight: 800; letter-spacing: .22em; color: var(--ink); }
+    header h1 { font-size: 24px; font-weight: 900; letter-spacing: -.01em; line-height: 1.1; color: var(--ink); }
     header h1 span { color: var(--accent); }
-    header .today { color: var(--ink-3); font-size: 11px; }
+    header .today { color: var(--ink-3); font-size: 12px; font-weight: 700; white-space: nowrap; }
 
     /* streak hero — live day counter */
     .streak-hero {
-      background: var(--surface);
+      background: linear-gradient(135deg, var(--surface-2), var(--surface));
       border: 1px solid var(--accent-dim);
       border-left: 3px solid var(--accent);
-      border-radius: 6px;
-      padding: 14px 16px;
+      border-radius: var(--radius);
+      box-shadow: 0 14px 36px -18px rgba(255, 140, 58, .45);
+      padding: 18px 20px;
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
       flex-wrap: wrap;
     }
-    .streak-hero .label { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+    .streak-hero .label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); font-weight: 800; }
     .streak-hero .big {
-      font-size: 52px; font-weight: 800; letter-spacing: -.03em; color: var(--accent);
+      font-size: 56px; font-weight: 900; letter-spacing: -.03em; color: var(--accent);
       line-height: 1.05; font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 28px rgba(255, 140, 58, .35);
     }
-    .streak-hero .big small { font-size: 15px; font-weight: 700; color: var(--ink-2); letter-spacing: .1em; }
+    .streak-hero .big small { font-size: 15px; font-weight: 800; color: var(--ink-2); letter-spacing: .08em; }
+    .streak-hero .cheer { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+    .streak-hero .cheer b { color: var(--lime); font-weight: 900; }
     .sh-right { text-align: right; }
     .sh-right .clock {
-      font-size: 26px; font-weight: 700; color: var(--ink);
-      font-variant-numeric: tabular-nums; letter-spacing: .02em;
+      font-size: 28px; font-weight: 800; color: var(--lime);
+      font-variant-numeric: tabular-nums; letter-spacing: .01em;
     }
     .sh-right .clock.warn { color: var(--warn); }
-    .sh-right .cap { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
-    .sh-right .cap b { color: var(--accent); font-weight: 700; }
+    .sh-right .cap { font-size: 12px; color: var(--ink-2); margin-top: 2px; font-weight: 600; }
+    .sh-right .cap b { color: var(--lime); font-weight: 900; }
 
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
     .tile {
-      background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
-      padding: 10px 12px 12px;
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 14px 16px 16px;
     }
-    .tile .label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
-    .tile .value { font-size: 28px; font-weight: 700; margin-top: 2px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-    .tile .value small { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
-    .tile.hero .value { color: var(--accent); }
-    .tile .sub { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
-    .tile .sub.up { color: var(--accent); }
+    .tile .label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); font-weight: 800; }
+    .tile .value { font-size: 30px; font-weight: 900; margin-top: 4px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .tile .value small { font-size: 14px; font-weight: 700; color: var(--ink-3); letter-spacing: 0; }
+    .tile.hero { border-color: rgba(201, 242, 79, .22); }
+    .tile.hero .value { color: var(--lime); }
+    .tile .sub { font-size: 12px; color: var(--ink-2); margin-top: 4px; font-weight: 600; }
+    .tile .sub.up { color: var(--lime); font-weight: 800; }
     section h2 {
-      font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3);
-      font-weight: 600; margin: 16px 0 8px; display: flex; justify-content: space-between;
+      font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+      font-weight: 800; margin: 20px 0 8px; display: flex; justify-content: space-between;
     }
-    section h2 .range { letter-spacing: .04em; text-transform: none; font-weight: 400; }
-    .chartbox { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 8px 6px; }
+    section h2 .range { letter-spacing: .02em; text-transform: none; font-weight: 600; }
+    .chartbox { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 10px 6px; }
     #chart { display: block; width: 100%; height: auto; }
+    #chart text { font-family: inherit; font-weight: 700; }
     .tooltip {
       position: fixed; z-index: 10; pointer-events: none; display: none;
-      background: var(--surface-2); border: 1px solid var(--accent-dim); border-radius: 4px;
-      padding: 6px 9px; font-size: 11px; box-shadow: 0 4px 16px rgba(0,0,0,.7);
+      background: var(--surface-2); border: 1px solid var(--accent-dim); border-radius: 10px;
+      padding: 8px 11px; font-size: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
     }
-    .tooltip .t-label { color: var(--ink-3); font-size: 10px; letter-spacing: .08em; }
-    .tooltip .t-value { font-weight: 700; font-size: 13px; margin-top: 1px; }
-    .tooltip .t-value em { font-style: normal; color: var(--accent); }
-    .legend-note { font-size: 10px; color: var(--ink-3); margin-top: 4px; padding-left: 2px; }
-    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
-    .grid2 { display: grid; grid-template-columns: 5fr 7fr; gap: 8px; align-items: start; margin-top: 8px; }
-    form.add { padding: 12px; display: grid; gap: 8px; }
-    form.add label { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 3px; }
+    .tooltip .t-label { color: var(--ink-3); font-size: 11px; letter-spacing: .06em; font-weight: 800; }
+    .tooltip .t-value { font-weight: 900; font-size: 14px; margin-top: 2px; }
+    .tooltip .t-value em { font-style: normal; color: var(--lime); }
+    .legend-note { font-size: 11px; color: var(--ink-3); margin-top: 6px; padding-left: 6px; font-weight: 600; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .grid2 { display: grid; grid-template-columns: 5fr 7fr; gap: 10px; align-items: start; margin-top: 8px; }
+    form.add { padding: 16px; display: grid; gap: 10px; }
+    form.add label { display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; font-weight: 800; }
     form.add input {
-      width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
-      color: var(--ink); font: inherit; padding: 7px 9px; color-scheme: dark;
+      width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-s);
+      color: var(--ink); font: inherit; font-weight: 700; padding: 10px 12px; color-scheme: dark;
+      transition: border-color .15s, box-shadow .15s;
     }
-    form.add input:focus { outline: none; border-color: var(--accent); }
-    form.add .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    form.add input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 140, 58, .18); }
+    form.add .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     button {
-      font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid transparent;
-      background: var(--accent); color: #050607; font-weight: 700; letter-spacing: .1em;
-      padding: 8px 14px; font-size: 12px;
+      font: inherit; cursor: pointer; border-radius: var(--radius-s); border: none;
+      background: linear-gradient(90deg, var(--accent-deep), #ff922b); color: #fff; font-weight: 900; letter-spacing: .04em;
+      padding: 12px 16px; font-size: 13px;
+      box-shadow: 0 8px 20px -10px rgba(232, 89, 12, .7);
+      transition: transform .1s, filter .15s;
     }
-    button:hover { filter: brightness(1.12); }
-    .msg { font-size: 11px; min-height: 16px; color: var(--ink-3); }
+    button:hover { filter: brightness(1.08); }
+    button:active { transform: scale(.98); }
+    button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+    .msg { font-size: 12px; min-height: 17px; color: var(--ink-3); font-weight: 700; }
     .msg.err { color: var(--warn); }
-    .msg.ok { color: var(--accent); }
+    .msg.ok { color: var(--lime); }
     .runs .head, .run {
-      display: grid; grid-template-columns: 82px 1fr 52px 66px 34px; gap: 8px; align-items: center;
-      padding: 7px 12px; font-size: 12px;
+      display: grid; grid-template-columns: 82px 1fr 52px 66px 40px; gap: 8px; align-items: center;
+      padding: 9px 14px; font-size: 13px;
     }
     .runs .head {
-      color: var(--ink-3); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--ink-3); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800;
       border-bottom: 1px solid var(--line);
     }
-    .run { border-bottom: 1px solid var(--line); }
+    .run { border-bottom: 1px solid var(--line); font-weight: 700; }
     .run:last-child { border-bottom: none; }
     .run:nth-child(odd) { background: var(--surface-2); }
     .run .d { color: var(--ink-2); }
-    .run .km { font-weight: 700; }
+    .run .km { font-weight: 900; color: var(--accent); }
     .run .pace, .run .time { color: var(--ink-2); }
     .run .del {
       background: none; border: 1px solid var(--line); color: var(--ink-3);
-      font-size: 10px; padding: 3px 0; width: 30px; letter-spacing: 0;
+      font-size: 11px; font-weight: 800; padding: 4px 0; width: 36px; letter-spacing: .02em;
+      border-radius: 999px; box-shadow: none;
     }
     .run .del:hover { color: var(--warn); border-color: var(--warn); filter: none; }
-    .empty { padding: 16px 12px; color: var(--ink-3); font-size: 12px; }
-    footer { margin-top: 14px; font-size: 10px; color: var(--ink-3); letter-spacing: .06em; }
+    .empty { padding: 18px 14px; color: var(--ink-3); font-size: 13px; }
+    footer { margin-top: 18px; font-size: 12px; color: var(--ink-3); font-weight: 600; }
     @media (max-width: 720px) {
-      .stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-      .tile .value { font-size: 20px; }
-      .streak-hero { padding: 12px; }
-      .streak-hero .big { font-size: 40px; }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .tile { padding: 12px 12px 13px; }
+      .tile .value { font-size: 22px; }
+      .streak-hero { padding: 16px; }
+      .streak-hero .big { font-size: 44px; }
       .sh-right { text-align: left; }
-      .sh-right .clock { font-size: 20px; }
+      .sh-right .clock { font-size: 22px; }
       .grid2 { grid-template-columns: 1fr; }
-      .runs .head, .run { grid-template-columns: 74px 1fr 46px 60px 30px; gap: 6px; font-size: 11px; padding: 7px 10px; }
+      .runs .head, .run { grid-template-columns: 70px 1fr 44px 58px 36px; gap: 6px; font-size: 12px; padding: 8px 10px; }
     }
     @media (max-width: 380px) {
       .stats { grid-template-columns: 1fr 1fr; }
+      .tile:nth-child(3) { grid-column: 1 / -1; }
+      .tile .value { font-size: 26px; }
     }
   </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>NIGHT<span>OPS</span>_</h1>
+    <h1>After<span>glow</span></h1>
     <div class="today" id="today"></div>
   </header>
 
@@ -158,6 +179,7 @@
     <div class="sh-left">
       <div class="label">Streak — live</div>
       <div class="big"><span id="streak">0</span><small> DAYS</small></div>
+      <div class="cheer" id="streakCheer">&nbsp;</div>
     </div>
     <div class="sh-right">
       <div class="clock" id="clock">--:--:--</div>
@@ -187,7 +209,7 @@
     <h2>Weekly distance <span class="range" id="chartRange"></span></h2>
     <div class="chartbox">
       <svg id="chart" viewBox="0 0 640 220" role="img" aria-label="Weekly distance, last 12 weeks"></svg>
-      <div class="legend-note">hover a bar for week detail</div>
+      <div class="legend-note">tap or hover a bar for the week's detail</div>
       <div class="tooltip" id="tooltip" role="status"></div>
     </div>
   </section>
@@ -211,7 +233,7 @@
           </div>
         </div>
         <div class="msg" id="msg"></div>
-        <button type="submit">ADD RUN</button>
+        <button type="submit">Add run</button>
       </form>
       <div class="panel">
         <div class="runs">
@@ -224,7 +246,7 @@
     </div>
   </section>
 
-  <footer>nightops · data stays in this browser · localStorage</footer>
+  <footer>afterglow · your runs stay in this browser · localStorage</footer>
 </div>
 <script src="app.js"></script>
 </body>
