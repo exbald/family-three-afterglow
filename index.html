@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunny Miles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <h1>Sunny Miles ☀️</h1>
+      <p class="greeting" id="greeting">Let's run!</p>
+    </header>
+
+    <section class="stats" aria-label="Your stats">
+      <div class="stat-card stat-week">
+        <p class="stat-label">This week</p>
+        <p class="stat-value"><span id="week-total">0</span><span class="stat-unit"> km</span></p>
+        <div class="goal-row">
+          <div class="goal-bar" role="progressbar" aria-label="Weekly goal progress" aria-valuemin="0" id="goal-bar">
+            <div class="goal-fill" id="goal-fill"></div>
+          </div>
+          <div class="goal-stepper">
+            <button type="button" id="goal-minus" aria-label="Lower weekly goal">−</button>
+            <span id="goal-text">Goal 15 km</span>
+            <button type="button" id="goal-plus" aria-label="Raise weekly goal">+</button>
+          </div>
+        </div>
+        <p class="goal-message" id="goal-message"></p>
+      </div>
+      <div class="stat-card stat-streak">
+        <p class="stat-label">Streak</p>
+        <p class="stat-value"><span id="streak">0</span><span class="stat-unit"> 🔥</span></p>
+        <p class="stat-sub" id="streak-sub">days in a row</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>This week's runs</h2>
+      <div class="chart-wrap">
+        <div class="chart" id="chart" role="img" aria-label="Bar chart of kilometres run each day this week"></div>
+        <div class="chart-tip" id="chart-tip" hidden></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Log a run</h2>
+      <div class="quick-row" id="quick-row">
+        <button type="button" data-quick="1">1 km</button>
+        <button type="button" data-quick="3">3 km</button>
+        <button type="button" data-quick="5">5 km</button>
+        <button type="button" data-quick="10">10 km</button>
+      </div>
+      <div class="distance-row">
+        <button type="button" id="dist-minus" aria-label="Less distance">−</button>
+        <div class="distance-display">
+          <span id="distance">3.0</span><span class="km">km</span>
+        </div>
+        <button type="button" id="dist-plus" aria-label="More distance">+</button>
+      </div>
+      <button type="button" class="log-btn" id="log-btn">Log my run 🏃</button>
+    </section>
+
+    <section class="card">
+      <h2>Recent runs</h2>
+      <ul class="runs" id="runs-list"></ul>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="confetti-layer" id="confetti"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
