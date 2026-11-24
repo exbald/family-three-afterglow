@@ -3,27 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KMLOG</title>
+  <title>NIGHTOPS — run tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0d10;
-      --surface: #12151a;
-      --surface-2: #181c23;
-      --line: #232830;
-      --ink: #e6e9ee;
-      --ink-2: #9aa3b2;
-      --ink-3: #5b6472;
-      --accent: #82c91e;
-      --mark: #66a80f;
-      --accent-dim: #4a6b1c;
+      --bg: #050607;
+      --surface: #0c0e11;
+      --surface-2: #111418;
+      --line: #1e242b;
+      --ink: #f4f7fa;
+      --ink-2: #a7b1bd;
+      --ink-3: #57606c;
+      --accent: #45f0ff;
+      --mark: #17a9bd;
+      --accent-dim: #14606c;
+      --warn: #ffb020;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { background: var(--bg); }
     body {
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
       background: var(--bg);
       color: var(--ink);
       font-size: 13px;
@@ -35,16 +36,42 @@
       display: flex; align-items: baseline; justify-content: space-between;
       border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;
     }
-    header h1 { font-size: 15px; font-weight: 700; letter-spacing: .18em; }
+    header h1 { font-size: 15px; font-weight: 800; letter-spacing: .22em; color: var(--ink); }
     header h1 span { color: var(--accent); }
     header .today { color: var(--ink-3); font-size: 11px; }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+    /* streak hero — live day counter */
+    .streak-hero {
+      background: var(--surface);
+      border: 1px solid var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .streak-hero .label { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+    .streak-hero .big {
+      font-size: 52px; font-weight: 800; letter-spacing: -.03em; color: var(--accent);
+      line-height: 1.05; font-variant-numeric: tabular-nums;
+    }
+    .streak-hero .big small { font-size: 15px; font-weight: 700; color: var(--ink-2); letter-spacing: .1em; }
+    .sh-right { text-align: right; }
+    .sh-right .clock {
+      font-size: 26px; font-weight: 700; color: var(--ink);
+      font-variant-numeric: tabular-nums; letter-spacing: .02em;
+    }
+    .sh-right .clock.warn { color: var(--warn); }
+    .sh-right .cap { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
+    .sh-right .cap b { color: var(--accent); font-weight: 700; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
     .tile {
       background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
       padding: 10px 12px 12px;
     }
     .tile .label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
-    .tile .value { font-size: 30px; font-weight: 700; margin-top: 2px; letter-spacing: -.02em; }
+    .tile .value { font-size: 28px; font-weight: 700; margin-top: 2px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
     .tile .value small { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
     .tile.hero .value { color: var(--accent); }
     .tile .sub { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
@@ -58,11 +85,11 @@
     #chart { display: block; width: 100%; height: auto; }
     .tooltip {
       position: fixed; z-index: 10; pointer-events: none; display: none;
-      background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
-      padding: 6px 9px; font-size: 11px; box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      background: var(--surface-2); border: 1px solid var(--accent-dim); border-radius: 4px;
+      padding: 6px 9px; font-size: 11px; box-shadow: 0 4px 16px rgba(0,0,0,.7);
     }
     .tooltip .t-label { color: var(--ink-3); font-size: 10px; letter-spacing: .08em; }
-    .tooltip .t-value { font-weight: 600; font-size: 13px; margin-top: 1px; }
+    .tooltip .t-value { font-weight: 700; font-size: 13px; margin-top: 1px; }
     .tooltip .t-value em { font-style: normal; color: var(--accent); }
     .legend-note { font-size: 10px; color: var(--ink-3); margin-top: 4px; padding-left: 2px; }
     .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
@@ -73,16 +100,16 @@
       width: 100%; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
       color: var(--ink); font: inherit; padding: 7px 9px; color-scheme: dark;
     }
-    form.add input:focus { outline: none; border-color: var(--accent-dim); }
+    form.add input:focus { outline: none; border-color: var(--accent); }
     form.add .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     button {
       font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid transparent;
-      background: var(--accent); color: #0b0d10; font-weight: 600; letter-spacing: .08em;
+      background: var(--accent); color: #050607; font-weight: 700; letter-spacing: .1em;
       padding: 8px 14px; font-size: 12px;
     }
-    button:hover { filter: brightness(1.08); }
+    button:hover { filter: brightness(1.12); }
     .msg { font-size: 11px; min-height: 16px; color: var(--ink-3); }
-    .msg.err { color: #e6a23c; }
+    .msg.err { color: var(--warn); }
     .msg.ok { color: var(--accent); }
     .runs .head, .run {
       display: grid; grid-template-columns: 82px 1fr 52px 66px 34px; gap: 8px; align-items: center;
@@ -96,40 +123,53 @@
     .run:last-child { border-bottom: none; }
     .run:nth-child(odd) { background: var(--surface-2); }
     .run .d { color: var(--ink-2); }
-    .run .km { font-weight: 600; }
+    .run .km { font-weight: 700; }
     .run .pace, .run .time { color: var(--ink-2); }
     .run .del {
       background: none; border: 1px solid var(--line); color: var(--ink-3);
       font-size: 10px; padding: 3px 0; width: 30px; letter-spacing: 0;
     }
-    .run .del:hover { color: #e6a23c; border-color: #e6a23c; filter: none; }
+    .run .del:hover { color: var(--warn); border-color: var(--warn); filter: none; }
     .empty { padding: 16px 12px; color: var(--ink-3); font-size: 12px; }
     footer { margin-top: 14px; font-size: 10px; color: var(--ink-3); letter-spacing: .06em; }
     @media (max-width: 720px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .tile .value { font-size: 20px; }
+      .streak-hero { padding: 12px; }
+      .streak-hero .big { font-size: 40px; }
+      .sh-right { text-align: left; }
+      .sh-right .clock { font-size: 20px; }
       .grid2 { grid-template-columns: 1fr; }
       .runs .head, .run { grid-template-columns: 74px 1fr 46px 60px 30px; gap: 6px; font-size: 11px; padding: 7px 10px; }
-      .tile .value { font-size: 26px; }
+    }
+    @media (max-width: 380px) {
+      .stats { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
-<body data-palette="#66a80f">
+<body>
 <div class="wrap">
   <header>
-    <h1>KM<span>LOG</span>_</h1>
+    <h1>NIGHT<span>OPS</span>_</h1>
     <div class="today" id="today"></div>
   </header>
+
+  <div class="streak-hero">
+    <div class="sh-left">
+      <div class="label">Streak — live</div>
+      <div class="big"><span id="streak">0</span><small> DAYS</small></div>
+    </div>
+    <div class="sh-right">
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="cap" id="streakCap">&nbsp;</div>
+    </div>
+  </div>
 
   <div class="stats">
     <div class="tile hero">
       <div class="label">This week</div>
       <div class="value"><span id="weekKm">0</span><small> km</small></div>
       <div class="sub" id="weekSub">&nbsp;</div>
-    </div>
-    <div class="tile">
-      <div class="label">Streak</div>
-      <div class="value"><span id="streak">0</span><small> d</small></div>
-      <div class="sub">consecutive days</div>
     </div>
     <div class="tile">
       <div class="label">4-wk avg</div>
@@ -184,7 +224,7 @@
     </div>
   </section>
 
-  <footer>kmlog · data stays in this browser · localStorage</footer>
+  <footer>nightops · data stays in this browser · localStorage</footer>
 </div>
 <script src="app.js"></script>
 </body>

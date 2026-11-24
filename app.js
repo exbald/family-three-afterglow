@@ -1,7 +1,7 @@
 "use strict";
 const KEY = location.pathname + ":kmlog:runs";
-const ACCENT = "#82c91e";
-const MARK = "#66a80f";
+const ACCENT = "#45f0ff";
+const MARK = "#17a9bd";
 const $ = id => document.getElementById(id);
 const fmt = n => n.toFixed(1);
 
@@ -10,21 +10,22 @@ function loadRuns() {
     const raw = localStorage.getItem(KEY);
     const arr = raw ? JSON.parse(raw) : null;
     if (Array.isArray(arr)) return arr;
-  } catch (e) { return null; }
+  } catch (e) { /* ignore */ }
   return null;
 }
-function saveRuns(runs) { localStorage.setItem(KEY, JSON.stringify(runs)); }
+function saveRuns(runs) { try { localStorage.setItem(KEY, JSON.stringify(runs)); } catch (e) { /* ignore */ } }
 
 function iso(d) { return d.toISOString().slice(0, 10); }
 function fromISO(s) { return new Date(s + "T00:00:00"); }
 function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 function weekStart(dateStr) {
   const d = fromISO(dateStr);
-  const dow = (d.getDay() + 6) % 7;
+  const dow = (d.getDay() + 6) % 7; // Monday = 0
   return iso(addDays(d, -dow));
 }
 function daysAgoISO(n) { return iso(addDays(new Date(), -n)); }
 
+/* ---- seed: believable sample data so the first open is never empty ---- */
 function seed() {
   let s = 42;
   const rand = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
@@ -70,6 +71,30 @@ function currentStreak(runs) {
   return streak;
 }
 
+/* ---- live streak clock (hours/minutes/seconds until it can break) ---- */
+function updateClock(runs) {
+  const now = new Date();
+  const runDays = new Set(runs.map(r => r.date));
+  const today = iso(now);
+  const clock = $("clock");
+  const cap = $("streakCap");
+  const secsToday = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const left = 86400 - secsToday;
+  const hh = String(Math.floor(left / 3600)).padStart(2, "0");
+  const mm = String(Math.floor((left % 3600) / 60)).padStart(2, "0");
+  const ss = String(left % 60).padStart(2, "0");
+  const t = hh + ":" + mm + ":" + ss;
+  if (runDays.has(today)) {
+    clock.textContent = t;
+    clock.className = "clock";
+    cap.innerHTML = 'run logged today — streak <b>safe</b> until midnight';
+  } else {
+    clock.textContent = t;
+    clock.className = "clock warn";
+    cap.innerHTML = 'until streak breaks — <b>log a run today</b>';
+  }
+}
+
 /* ---- chart ---- */
 const WEEKS_SHOWN = 12;
 function renderChart(runs) {
@@ -82,12 +107,12 @@ function renderChart(runs) {
     const ws = weekStart(daysAgoISO(i * 7));
     weeks.push({ ws, km: weekKm(runs, ws), count: runs.filter(r => weekStart(r.date) === ws).length });
   }
-  const maxKm = Math.max(...weeks.map(w => w.km), 10);
+  const maxKm = Math.max.apply(null, weeks.map(w => w.km).concat([10]));
   const niceMax = Math.ceil(maxKm / 10) * 10;
   const plotW = W - pad.l - pad.r;
   const plotH = H - pad.t - pad.b;
   const band = plotW / weeks.length;
-  const barW = Math.min(24, band * 0.55);
+  const barW = Math.max(10, Math.min(24, band * 0.55));
   let out = [];
   for (let g = 0; g <= 2; g++) {
     const v = niceMax / 2 * g;
@@ -101,7 +126,7 @@ function renderChart(runs) {
     const y = pad.t + plotH - h;
     const cur = wk.ws === curWS;
     const fill = cur ? ACCENT : MARK;
-    const r = Math.min(4, h / 2);
+    const r = Math.min(3, h / 2);
     if (wk.km > 0) {
       out.push('<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + Math.max(0, h).toFixed(1) + '" rx="' + r.toFixed(1) + '" fill="' + fill + '"/>');
     } else {
@@ -110,30 +135,30 @@ function renderChart(runs) {
     if (cur) {
       out.push('<text x="' + (x + barW / 2).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle" fill="var(--ink-2)" font-size="10" font-weight="600">' + fmt(wk.km) + '</text>');
     }
-    out.push('<text x="' + (pad.l + band * i + band / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" fill="var(--ink-3)" font-size="10">' + (wk.ws.slice(5).replace("-", "/")) + '</text>');
+    out.push('<text x="' + (pad.l + band * i + band / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" fill="var(--ink-3)" font-size="10">' + wk.ws.slice(5).replace("-", "/") + '</text>');
     out.push('<rect class="hit" data-i="' + i + '" x="' + (pad.l + band * i).toFixed(1) + '" y="' + pad.t + '" width="' + band.toFixed(1) + '" height="' + plotH + '" fill="transparent"/>');
   });
   svg.innerHTML = out.join("");
-  renderTooltip(runs, weeks);
+  renderTooltip(weeks);
 }
 
-/* ---- tooltip ---- */
-function renderTooltip(runs, weeks) {
+/* ---- tooltip (bound once) ---- */
+let lastWeeks = [];
+let tipBound = false;
+function renderTooltip(weeks) {
+  lastWeeks = weeks;
+  if (tipBound) return;
+  tipBound = true;
   const tip = $("tooltip");
   const svg = $("chart");
-  const list = svg.querySelectorAll(".hit");
-  const svgEl = svg;
-  const svgPos = function () { return svgEl.getBoundingClientRect(); }
   svg.addEventListener("mousemove", function (e) {
     const t = e.target;
     if (t.classList && t.classList.contains("hit")) {
-      const wk = weeks[+t.getAttribute("data-i")];
-      const label = wk.ws + " → +6d";
-      tip.innerHTML = '<div class="t-label">' + label + '</div>' +
+      const wk = lastWeeks[+t.getAttribute("data-i")];
+      tip.innerHTML = '<div class="t-label">' + wk.ws + " → +6d" + '</div>' +
         '<div class="t-value"><em>' + fmt(wk.km) + ' km</em> · ' + wk.count + ' runs</div>';
-      const r = svgPos();
-      tip.style.left = (e.clientX + 12) + "px";
       tip.style.position = "fixed";
+      tip.style.left = (e.clientX + 12) + "px";
       tip.style.top = (e.clientY - 14) + "px";
       tip.style.display = "block";
     } else {
@@ -141,7 +166,6 @@ function renderTooltip(runs, weeks) {
     }
   });
   svg.addEventListener("mouseleave", function () { tip.style.display = "none"; });
-  void list; void runs;
 }
 
 /* ---- run list ---- */
@@ -174,7 +198,7 @@ function renderList(runs) {
   }
 }
 
-/* ---- init + events ---- */
+/* ---- render all ---- */
 function renderAll(runs) {
   const today = daysAgoISO(0);
   const curWS = weekStart(today);
@@ -188,7 +212,6 @@ function renderAll(runs) {
     const sign = diff >= 0 ? "+" : "−";
     sub.textContent = sign + fmt(Math.abs(diff)) + " km vs last week";
     sub.className = "sub" + (diff >= 0 ? " up" : "");
-    sub.textContent = sub.textContent;
   } else {
     sub.textContent = "no data for last week";
   }
@@ -199,7 +222,7 @@ function renderAll(runs) {
   const total = runs.reduce(function (s, r) { return s + r.km; }, 0);
   $("totalKm").textContent = fmt(total);
   $("totalSub").textContent = runs.length + " runs";
-  $("today").textContent = iso(new Date()) + " UTC+" + (-new Date().getTimezoneOffset() / 60);
+  $("today").textContent = iso(new Date()) + " · UTC" + (-new Date().getTimezoneOffset() / 60);
   $("chartRange").textContent = WEEKS_SHOWN + " weeks";
   renderChart(runs);
   renderList(runs);
@@ -212,6 +235,9 @@ function init() {
     saveRuns(runs);
   }
   renderAll(runs);
+  updateClock(runs);
+  setInterval(function () { updateClock(runs); }, 1000);
+  $("fDate").value = daysAgoISO(0);
   $("addForm").addEventListener("submit", function (e) {
     e.preventDefault();
     const date = $("fDate").value;
@@ -222,10 +248,11 @@ function init() {
       msg.textContent = "fill date, km, minutes";
       msg.className = "msg err";
       return;
-  }
+    }
     runs.push({ id: "run-" + Date.now(), date, km: Math.round(km * 10) / 10, min: Math.round(min) });
     saveRuns(runs);
     renderAll(runs);
+    updateClock(runs);
     msg.textContent = "run added";
     msg.className = "msg ok";
     $("fKm").value = "";
@@ -237,6 +264,7 @@ function init() {
     runs = runs.filter(function (r) { return r.id !== btn.dataset.id; });
     saveRuns(runs);
     renderAll(runs);
+    updateClock(runs);
   });
 }
 
