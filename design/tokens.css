@@ -1,38 +1,42 @@
-/* Afterglow design tokens — extracted from the app (index.html). */
+/* Afterglow design tokens — extracted from the running tracker app.
+   Dark, dense, warm. Numbers first. */
+
 :root {
-  /* colour */
-  --color-bg: #0e0b09;
-  --color-surface: #17120f;
-  --color-surface-2: #201915;
-  --color-line: #2e2520;
-  --color-ink: #f8f2eb;
-  --color-ink-2: #c0ae9f;
-  --color-ink-3: #8a7a6e;
-  --color-accent: #ff8c3a;
-  --color-accent-deep: #e8590s;
-  --color-accent-deep: #e8590c;
-  --color-accent-bright: #ff922b;
-  --color-accent-dim: #4d2c17;
-  --color-mark: #a3552a;
-  --color-lime: #c9f24f;
-  --color-warn: #ff6a5c;
+  /* ---- colour ---- */
+  --color-bg: #0e0b09;          /* near-black, warmed — page background */
+  --color-surface: #17120f;     /* tile / panel surface */
+  --color-surface-2: #201915;   /* raised surface: inputs, zebra rows, tooltips */
+  --color-line: #2e2520;        /* hairline borders, dividers, chart grid */
+  --color-ink: #f8f2eb;         /* primary text */
+  --color-ink-2: #c0ae9f;       /* secondary text, subs, captions */
+  --color-ink-3: #8a7a6e;       /* faint text: labels, headers, axis, footer */
+  --color-accent: #ff8c3a;      /* sunset orange — the hero accent */
+  --color-accent-deep: #e8590c; /* gradient start for primary buttons, chart hits */
+  --color-accent-hi: #ff922b;   /* gradient end for primary buttons */
+  --color-accent-dim: #4d2c17;  /* dim orange border for accent-framed surfaces */
+  --color-mark: #a3552a;        /* dimmed orange for past weeks / inactive bars */
+  --color-lime: #c9f24f;        /* lime — "good news" accent, up-ticks, safety */
+  --color-warn: #ff6a5c;        /* danger countdown, delete hover, errors */
+  --color-on-accent: #ffffff;   /* text on the orange button */
 
-  /* font */
+  /* ---- font ---- */
   --font-sans: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The app has no separate mono family — the "monospace accent" is
+     Nunito with tabular numerals and tight tracking on all numbers. */
+  --font-num: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* text sizes */
-  --text-hero: 56px;
-  --text-stat: 30px;
-  --text-clock: 28px;
-  --text-title: 24px;
-  --text-lg: 15px;
-  --text-body: 14px;
-  --text-sm: 13px;
-  --text-xs: 12px;
-  --text-label: 11px;
-  --text-axis: 10px;
+  /* ---- type scale (px) ---- */
+  --text-hero: 56px;   /* streak count */
+  --text-stat: 30px;   /* stat tile value */
+  --text-clock: 28px;  /* live countdown clock */
+  --text-title: 24px;  /* page h1 */
+  --text-lg: 15px;     /* unit after hero number */
+  --text-base: 14px;   /* body default */
+  --text-sm: 13px;     /* list rows, buttons, cheer line */
+  --text-xs: 12px;     /* captions, footer, today */
+  --text-label: 11px;  /* uppercase micro-labels, section h2 */
 
-  /* space */
+  /* ---- space (px) ---- */
   --space-1: 4px;
   --space-2: 6px;
   --space-3: 8px;
@@ -45,15 +49,26 @@
   --space-10: 24px;
   --space-12: 48px;
 
-  /* radius */
-  --radius-lg: 18px;
-  --radius-md: 12px;
-  --radius-sm: 10px;
-  --radius-pill: 999px;
+  /* ---- radius ---- */
+  --radius-l: 18px;   /* tiles, hero, panels, chartbox */
+  --radius-m: 12px;   /* buttons, inputs */
+  --radius-s: 10px;   /* tooltip */
+  --radius-pill: 999px; /* delete chip */
 
-  /* shadow */
-  --shadow-glow: 0 14px 36px -18px rgba(255, 140, 58, .45);
-  --shadow-btn: 0 8px 20px -10px rgba(232, 89, 12, .7);
-  --shadow-pop: 0 10px 30px rgba(0, 0, 0, .6);
-  --shadow-focus: 0 0 0 3px rgba(255, 140, 58, .18);
+  /* ---- shadow ---- */
+  --shadow-hero: 0 14px 36px -18px rgba(255, 140, 58, .45); /* orange glow under streak hero */
+  --shadow-button: 0 8px 20px -10px rgba(232, 89, 12, .7);  /* under primary button */
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, .6);              /* tooltip */
+  --shadow-focus: 0 0 0 3px rgba(255, 140, 58, .18);        /* input focus ring */
+  --shadow-glow-text: 0 0 28px rgba(255, 140, 58, .35);     /* text-shadow on hero number */
+
+  /* ---- borders ---- */
+  --border-line: 1px solid var(--color-line);
+  --border-accent-dim: 1px solid var(--color-accent-dim);
+  --border-accent-edge: 3px solid var(--color-accent); /* left edge on streak hero */
+
+  /* ---- effects ---- */
+  --glow-page: radial-gradient(900px 420px at 50% -80px, rgba(255, 140, 58, .16), transparent 70%);
+  --surface-sheen: linear-gradient(135deg, var(--color-surface-2), var(--color-surface));
+  --button-fill: linear-gradient(90deg, var(--color-accent-deep), var(--color-accent-hi));
 }

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0e0b09">
+<title>Afterglow — design kit</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--color-bg); }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg) var(--glow-page) no-repeat;
+    color: var(--color-ink);
+    font-size: var(--text-base);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: var(--space-10) var(--space-7) var(--space-12); }
+
+  .kit-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3);
+    border-bottom: var(--border-line); padding-bottom: var(--space-6); margin-bottom: var(--space-5);
+  }
+  .kit-head h1 { font-size: var(--text-title); font-weight: 900; letter-spacing: -.01em; line-height: 1.1; }
+  .kit-head h1 span { color: var(--color-accent); }
+  .kit-head .today { color: var(--color-ink-3); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+
+  h2 {
+    font-size: var(--text-label); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--color-ink-3); font-weight: 800; margin: var(--space-9) 0 var(--space-3);
+    display: flex; justify-content: space-between;
+  }
+  h2 .range { letter-spacing: .02em; text-transform: none; font-weight: 600; }
+
+  /* ---- swatches ---- */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--space-3); }
+  .sw {
+    background: var(--color-surface); border: var(--border-line); border-radius: var(--radius-l);
+    padding: var(--space-3); font-weight: 700;
+  }
+  .sw .chip { height: 44px; border-radius: var(--radius-m); border: var(--border-line); margin-bottom: var(--space-2); }
+  .sw .nm { font-size: var(--text-xs); color: var(--color-ink); }
+  .sw .hx { font-size: var(--text-xs); color: var(--color-ink-3); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+
+  /* ---- type scale ---- */
+  .typelist { display: grid; gap: var(--space-3); }
+  .ty { display: grid; grid-template-columns: 92px 1fr; gap: var(--space-4); align-items: baseline;
+        background: var(--color-surface); border: var(--border-line); border-radius: var(--radius-l);
+        padding: var(--space-4) var(--space-5); }
+  .ty .spec { font-size: var(--text-xs); color: var(--color-ink-3); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ty .demo-label { font-size: var(--text-label); letter-spacing: .12em; text-transform: uppercase; color: var(--color-ink-3); font-weight: 800; }
+  .ty .demo-hero { font-size: var(--text-hero); font-weight: 900; letter-spacing: -.03em; color: var(--color-accent); line-height: 1.05; font-variant-numeric: tabular-nums; text-shadow: var(--shadow-glow-text); }
+  .ty .demo-stat { font-size: var(--text-stat); font-weight: 900; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .ty .demo-clock { font-size: var(--text-clock); font-weight: 800; color: var(--color-lime); font-variant-numeric: tabular-nums; }
+  .ty .demo-title { font-size: var(--text-title); font-weight: 900; letter-spacing: -.01em; }
+  .ty .demo-sm { font-size: var(--text-sm); font-weight: 700; color: var(--color-ink-2); }
+
+  /* ---- space + radius ---- */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  .panel { background: var(--color-surface); border: var(--border-line); border-radius: var(--radius-l); padding: var(--space-5); }
+  .sp-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .sp-row .bar { height: 12px; background: var(--color-accent-dim); border-radius: 3px; }
+  .sp-row .n { font-size: var(--text-xs); color: var(--color-ink-3); font-weight: 700; font-variant-numeric: tabular-nums; width: 58px; }
+  .rad-row { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+  .rad { width: 64px; height: 44px; background: var(--color-surface-2); border: var(--border-line); }
+  .rad + .n { font-size: var(--text-xs); color: var(--color-ink-3); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* ---- components ---- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  .tile { background: var(--color-surface); border: var(--border-line); border-radius: var(--radius-l);
+          padding: var(--space-6) var(--space-7); }
+  .tile .label { font-size: var(--text-label); letter-spacing: .12em; text-transform: uppercase; color: var(--color-ink-3); font-weight: 800; }
+  .tile .value { font-size: var(--text-stat); font-weight: 900; margin-top: var(--space-1); letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .tile .value small { font-size: var(--text-base); font-weight: 700; color: var(--color-ink-3); }
+  .tile.hero { border-color: rgba(201, 242, 79, .22); }
+  .tile.hero .value { color: var(--color-lime); }
+  .tile .sub { font-size: var(--text-xs); color: var(--color-ink-2); margin-top: var(--space-1); font-weight: 600; }
+  .tile .sub.up { color: var(--color-lime); font-weight: 800; }
+
+  .streak-hero {
+    background: var(--surface-sheen); border: var(--border-accent-dim); border-left: var(--border-accent-edge);
+    border-radius: var(--radius-l); box-shadow: var(--shadow-hero);
+    padding: var(--space-8) var(--space-9); display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-7); flex-wrap: wrap;
+  }
+  .streak-hero .label { font-size: var(--text-label); letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-3); font-weight: 800; }
+  .streak-hero .big { font-size: var(--text-hero); font-weight: 900; letter-spacing: -.03em; color: var(--color-accent); line-height: 1.05; font-variant-numeric: tabular-nums; text-shadow: var(--shadow-glow-text); }
+  .streak-hero .big small { font-size: var(--text-lg); font-weight: 800; color: var(--color-ink-2); letter-spacing: .08em; }
+  .sh-right { text-align: right; }
+  .sh-right .clock { font-size: var(--text-clock); font-weight: 800; color: var(--color-lime); font-variant-numeric: tabular-nums; }
+  .sh-right .clock.warn { color: var(--color-warn); }
+  .sh-right .cap { font-size: var(--text-xs); color: var(--color-ink-2); margin-top: 2px; font-weight: 600; }
+  .sh-right .cap b { color: var(--color-lime); font-weight: 900; }
+
+  .grid2 { display: grid; grid-template-columns: 5fr 7fr; gap: var(--space-4); align-items: start; }
+  form.add { padding: var(--space-7); display: grid; gap: var(--space-4); }
+  form.add label { display: block; font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; color: var(--color-ink-3); margin-bottom: var(--space-1); font-weight: 800; }
+  form.add input {
+    width: 100%; background: var(--color-surface-2); border: var(--border-line); border-radius: var(--radius-m);
+    color: var(--color-ink); font: inherit; font-weight: 700; padding: var(--space-5) var(--space-6); color-scheme: dark;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  form.add input:focus { outline: none; border-color: var(--color-accent); box-shadow: var(--shadow-focus); }
+  form.add .row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  button {
+    font: inherit; cursor: pointer; border-radius: var(--radius-m); border: none;
+    background: var(--button-fill); color: var(--color-on-accent); font-weight: 900; letter-spacing: .04em;
+    padding: 12px var(--space-7); font-size: var(--text-sm);
+    box-shadow: var(--shadow-button); transition: transform .1s, filter .15s;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:active { transform: scale(.98); }
+  button:focus-visible { outline: 2px solid var(--color-lime); outline-offset: 2px; }
+  .msg { font-size: var(--text-xs); min-height: 17px; color: var(--color-ink-3); font-weight: 700; }
+  .msg.ok { color: var(--color-lime); }
+
+  .runs .head, .run { display: grid; grid-template-columns: 82px 1fr 52px 66px 40px; gap: var(--space-3); align-items: center; padding: 9px var(--space-6); font-size: var(--text-sm); }
+  .runs .head { color: var(--color-ink-3); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; font-weight: 800; border-bottom: var(--border-line); }
+  .run { border-bottom: var(--border-line); font-weight: 700; }
+  .run:last-child { border-bottom: none; }
+  .run:nth-child(odd) { background: var(--color-surface-2); }
+  .run .d { color: var(--color-ink-2); }
+  .run .km { font-weight: 900; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .run .pace, .run .time { color: var(--color-ink-2); }
+  .run .del {
+    background: none; border: var(--border-line); color: var(--color-ink-3);
+    font-size: var(--text-label); font-weight: 800; padding: var(--space-1) 0; width: 36px; letter-spacing: .02em;
+    border-radius: var(--radius-pill); box-shadow: none;
+  }
+  .run .del:hover { color: var(--color-warn); border-color: var(--color-warn); filter: none; }
+
+  footer { margin-top: var(--space-8); font-size: var(--text-xs); color: var(--color-ink-3); font-weight: 600; }
+
+  @media (max-width: 720px) {
+    .grid2, .duo { grid-template-columns: 1fr; }
+    .streak-hero { padding: var(--space-7); }
+    .streak-hero .big { font-size: 44px; }
+    .sh-right { text-align: left; }
+    .ty { grid-template-columns: 76px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kit-head">
+    <h1>After<span>glow</span> — design kit</h1>
+    <div class="today">tokens.css · dark &amp; warm</div>
+  </div>
+
+  <h2>Colour</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:var(--color-bg)"></div><div class="nm">bg</div><div class="hx">#0e0b09</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-surface)"></div><div class="nm">surface</div><div class="hx">#17120f</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-surface-2)"></div><div class="nm">surface-2</div><div class="hx">#201915</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-line)"></div><div class="nm">line</div><div class="hx">#2e2520</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-ink)"></div><div class="nm">ink</div><div class="hx">#f8f2eb</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-ink-2)"></div><div class="nm">ink-2</div><div class="hx">#c0ae9f</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-ink-3)"></div><div class="nm">ink-3</div><div class="hx">#8a7a6e</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-accent)"></div><div class="nm">accent</div><div class="hx">#ff8c3a</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-accent-deep)"></div><div class="nm">accent-deep</div><div class="hx">#e8590c</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-accent-hi)"></div><div class="nm">accent-hi</div><div class="hx">#ff922b</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-accent-dim)"></div><div class="nm">accent-dim</div><div class="hx">#4d2c17</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-mark)"></div><div class="nm">mark</div><div class="hx">#a3552a</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-lime)"></div><div class="nm">lime</div><div class="hx">#c9f24f</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-warn)"></div><div class="nm">warn</div><div class="hx">#ff6a5c</div></div>
+  </div>
+
+  <h2>Type <span class="range">Nunito · tabular-nums for figures</span></h2>
+  <div class="typelist">
+    <div class="ty"><div class="spec">56 / 900</div><div class="demo-hero">17<small> DAYS</small></div></div>
+    <div class="ty"><div class="spec">30 / 900</div><div class="demo-stat">42.6<small> km</small></div></div>
+    <div class="ty"><div class="spec">28 / 800</div><div class="demo-clock">06:11:52</div></div>
+    <div class="ty"><div class="spec">24 / 900</div><div class="demo-title">Afterglow</div></div>
+    <div class="ty"><div class="spec">13 / 700</div><div class="demo-sm">14 days strong. Keep the glow going.</div></div>
+    <div class="ty"><div class="spec">11 / 800</div><div class="demo-label">Streak — live</div></div>
+  </div>
+
+  <h2>Space &amp; radius</h2>
+  <div class="duo">
+    <div class="panel">
+      <div class="sp-row"><div class="n">4px</div><div class="bar" style="width:var(--space-1)"></div></div>
+      <div class="sp-row"><div class="n">8px</div><div class="bar" style="width:var(--space-3)"></div></div>
+      <div class="sp-row"><div class="n">10px</div><div class="bar" style="width:var(--space-4)"></div></div>
+      <div class="sp-row"><div class="n">14px</div><div class="bar" style="width:var(--space-6)"></div></div>
+      <div class="sp-row"><div class="n">16px</div><div class="bar" style="width:var(--space-7)"></div></div>
+      <div class="sp-row"><div class="n">24px</div><div class="bar" style="width:var(--space-10)"></div></div>
+      <div class="sp-row"><div class="n">48px</div><div class="bar" style="width:var(--space-12)"></div></div>
+    </div>
+    <div class="panel">
+      <div class="rad-row">
+        <div class="rad" style="border-radius:var(--radius-l)"></div><span class="n">18px</span>
+        <div class="rad" style="border-radius:var(--radius-m)"></div><span class="n">12px</span>
+        <div class="rad" style="border-radius:var(--radius-s)"></div><span class="n">10px</span>
+        <div class="rad" style="border-radius:var(--radius-pill)"></div><span class="n">999px</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Components</h2>
+
+  <div class="streak-hero">
+    <div class="sh-left">
+      <div class="label">Streak — live</div>
+      <div class="big">17<small> DAYS</small></div>
+    </div>
+    <div class="sh-right">
+      <div class="clock">06:11:52</div>
+      <div class="cap">run logged today — streak <b>safe</b> until midnight</div>
+    </div>
+  </div>
+
+  <div class="stats" style="margin-top:var(--space-4)">
+    <div class="tile hero">
+      <div class="label">This week</div>
+      <div class="value">42.6<small> km</small></div>
+      <div class="sub up">+7.1 km vs last week</div>
+    </div>
+    <div class="tile">
+      <div class="label">4-wk avg</div>
+      <div class="value">35.2<small> km</small></div>
+      <div class="sub">per week</div>
+    </div>
+    <div class="tile">
+      <div class="label">Total</div>
+      <div class="value">438.9<small> km</small></div>
+      <div class="sub">61 runs</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:var(--space-4)">
+    <form class="add panel" onsubmit="return false">
+      <div>
+        <label for="kDate">Date</label>
+        <input type="date" id="kDate" value="2026-11-25">
+      </div>
+      <div class="row">
+        <div>
+          <label for="kKm">Distance (km)</label>
+          <input type="number" id="kKm" placeholder="5.2" min="0.1" max="200" step="0.1">
+        </div>
+        <div>
+          <label for="kMin">Duration (min)</label>
+          <input type="number" id="kMin" placeholder="28" min="1" max="600" step="1">
+        </div>
+      </div>
+      <div class="msg ok">run added</div>
+      <button type="submit">Add run</button>
+    </form>
+
+    <div class="panel" style="padding:0">
+      <div class="runs">
+        <div class="head"><span>Date</span><span>KM</span><span>Time</span><span>Pace</span><span></span></div>
+        <div class="run"><span class="d">25 Nov</span><span class="km">8.0</span><span class="time">42m</span><span class="pace">5:15/km</span><button class="del" type="button">DEL</button></div>
+        <div class="run"><span class="d">24 Nov</span><span class="km">5.2</span><span class="time">27m</span><span class="pace">5:11/km</span><button class="del" type="button">DEL</button></div>
+        <div class="run"><span class="d">23 Nov</span><span class="km">4.5</span><span class="time">24m</span><span class="pace">5:20/km</span><button class="del" type="button">DEL</button></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>afterglow design kit · every value above comes from the app · tokens.css</footer>
+</div>
+</body>
+</html>
