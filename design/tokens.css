@@ -1,0 +1,59 @@
+/* Afterglow design tokens — extracted from the app (index.html). */
+:root {
+  /* colour */
+  --color-bg: #0e0b09;
+  --color-surface: #17120f;
+  --color-surface-2: #201915;
+  --color-line: #2e2520;
+  --color-ink: #f8f2eb;
+  --color-ink-2: #c0ae9f;
+  --color-ink-3: #8a7a6e;
+  --color-accent: #ff8c3a;
+  --color-accent-deep: #e8590s;
+  --color-accent-deep: #e8590c;
+  --color-accent-bright: #ff922b;
+  --color-accent-dim: #4d2c17;
+  --color-mark: #a3552a;
+  --color-lime: #c9f24f;
+  --color-warn: #ff6a5c;
+
+  /* font */
+  --font-sans: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* text sizes */
+  --text-hero: 56px;
+  --text-stat: 30px;
+  --text-clock: 28px;
+  --text-title: 24px;
+  --text-lg: 15px;
+  --text-body: 14px;
+  --text-sm: 13px;
+  --text-xs: 12px;
+  --text-label: 11px;
+  --text-axis: 10px;
+
+  /* space */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 14px;
+  --space-7: 16px;
+  --space-8: 18px;
+  --space-9: 20px;
+  --space-10: 24px;
+  --space-12: 48px;
+
+  /* radius */
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+
+  /* shadow */
+  --shadow-glow: 0 14px 36px -18px rgba(255, 140, 58, .45);
+  --shadow-btn: 0 8px 20px -10px rgba(232, 89, 12, .7);
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, .6);
+  --shadow-focus: 0 0 0 3px rgba(255, 140, 58, .18);
+}
